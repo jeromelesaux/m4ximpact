@@ -1,8 +1,11 @@
 Todo : 
 
-- probleme d'affichage du browser
-- path courant qui ne s'affiche pas 
-- implementer le bouton navigate dans le browser 
+- probleme d'affichage du browser : done 
+- path courant qui ne s'affiche pas  : done 
+- implementer le bouton navigate dans le browser : done 
 - implementer la tab selected file avec bouton sauvegarder avec ouverture du finder, et un bouton envoie de mail directement
+- sauvegarde des fichiers selectionnés
+- envoie des fichiers par mail 
 - connecter l'application au client m4 
-- configuration de sauvegarde à faire
+- configuration de sauvegarde à faire : done 
+- tester sur machine réelle 
