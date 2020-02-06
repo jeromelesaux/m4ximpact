@@ -8,4 +8,5 @@ Todo :
 - envoie des fichiers par mail 
 - connecter l'application au client m4 
 - configuration de sauvegarde à faire : done 
+- ajouter un bouton go back dans le browser
 - tester sur machine réelle 
