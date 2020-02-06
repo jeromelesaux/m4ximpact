@@ -10,10 +10,11 @@ import (
 )
 
 var (
-	m4url            string
-	m4remoteLocation string
-	selectedFiles    = make([]selectedFile, 0)
+	m4remoteLocation string = "/"
+	selectedFiles           = make([]selectedFile, 0)
 	mainwin          *ui.Window
+	config           *Config
+	currentDirectory = ui.NewEntry()
 )
 
 type selectedFile struct {
@@ -51,7 +52,12 @@ func removeFile(i int, m *modelBrowser) {
 
 func main() {
 
+	config = NewConfig()
 	ui.Main(setupUI)
+
+}
+
+func browseM4(*ui.Button) {
 
 }
 
@@ -75,13 +81,15 @@ func makeConfigurationPage() ui.Control {
 
 	m4urlEntry := ui.NewEntry()
 	m4urlEntry.SetReadOnly(false)
+	m4urlEntry.SetText(config.M4Url)
 	confForm.Append("M4 Address", m4urlEntry, false)
 
 	// m4 button to set url
 	m4UrlButton := ui.NewButton(".Save Url.")
 	m4UrlButton.OnClicked(func(*ui.Button) {
-		m4url = m4urlEntry.Text()
-		fmt.Println("Set m4 url : " + m4url)
+		config.M4Url = m4urlEntry.Text()
+		config.Save()
+		fmt.Println("Set m4 url : " + config.M4Url)
 	})
 
 	confForm.Append("Set", m4UrlButton, false)
@@ -91,8 +99,6 @@ func makeConfigurationPage() ui.Control {
 type modelBrowser struct {
 	m4Dir            m4.M4Dir
 	filesCheckStates []bool
-	row9Text         string
-	yellowRow        int
 	m4client         *m4.M4Client
 }
 
@@ -117,6 +123,33 @@ func (mb *modelBrowser) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 	}
 }
 
+func (mb *modelBrowser) Clean() {
+	mb.m4Dir.Nodes = mb.m4Dir.Nodes[:0]
+	mb.filesCheckStates = make([]bool, len(mb.m4Dir.Nodes))
+}
+
+func (mb *modelBrowser) Navigate(m *ui.TableModel, row int) {
+	rowsBefore := len(mb.m4Dir.Nodes)
+	remotePath := mb.m4Dir.CurrentPath + "/" + mb.m4Dir.Nodes[row].Name
+	mb.Clean()
+	updateSampleBrowser(mb)
+	mb.m4Dir.CurrentPath = remotePath
+	rowsAfter := len(mb.m4Dir.Nodes)
+	for i := 0; i < rowsBefore; i++ {
+		m.RowChanged(i)
+	}
+	if rowsBefore > rowsAfter {
+		for i := rowsAfter; i < rowsBefore; i++ {
+			m.RowDeleted(i)
+		}
+	} else {
+		for i := rowsBefore; i < rowsAfter; i++ {
+			m.RowInserted(i)
+		}
+	}
+	currentDirectory.SetText(mb.m4Dir.CurrentPath)
+}
+
 func (mb *modelBrowser) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
 
 	switch column {
@@ -135,11 +168,13 @@ func (mb *modelBrowser) SetCellValue(m *ui.TableModel, row, column int, value ui
 		if row < len(mb.m4Dir.Nodes) {
 			if mb.m4Dir.Nodes[row].IsDirectory {
 				fmt.Println("Go to navigate into directory " + m4remoteLocation + "/" + mb.m4Dir.Nodes[row].Name)
+				mb.Navigate(m, row)
 			}
 		}
 	}
 
 }
+
 func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	switch column {
 	case 0:
@@ -153,6 +188,9 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 		}
 		return t
 	case 2:
+		if mb.m4Dir.Nodes[row].IsDirectory {
+			return ui.TableString("x")
+		}
 		if mb.filesCheckStates[row] {
 			return ui.TableString("selected")
 		} else {
@@ -175,7 +213,7 @@ func makeSampleBrowser() *modelBrowser {
 	m := newModelBrowser()
 	m.m4Dir.CurrentPath = "/home/home/documents"
 	for i := 0; i < 5; i++ {
-		m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "fichier", Size: "10 ko", IsDirectory: false})
+		m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "fichier" + strconv.Itoa(i), Size: "10 ko", IsDirectory: false})
 	}
 	m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "repertoire", Size: "0 ko", IsDirectory: true})
 	m.filesCheckStates = make([]bool, len(m.m4Dir.Nodes))
@@ -183,19 +221,47 @@ func makeSampleBrowser() *modelBrowser {
 	return m
 }
 
+func updateSampleBrowser(m *modelBrowser) {
+	m.m4Dir.CurrentPath = "/home/home/documents/repertoire"
+	m.m4Dir.Nodes = m.m4Dir.Nodes[:0]
+	for i := 0; i < 15; i++ {
+		m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "fichier" + strconv.Itoa(i), Size: "10 ko", IsDirectory: false})
+	}
+	m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "repertoire2", Size: "0 ko", IsDirectory: true})
+	m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "repertoire3", Size: "0 ko", IsDirectory: true})
+	m.filesCheckStates = make([]bool, len(m.m4Dir.Nodes))
+	m4remoteLocation = m.m4Dir.CurrentPath
+}
+
 func makeM4DiskBrowser() ui.Control {
+
+	browser := makeSampleBrowser()
+
 	vbox := ui.NewVerticalBox()
 	vbox.SetPadded(true)
+	//
+	//	hbox := ui.NewHorizontalBox()
+	//	hbox.SetPadded(true)
+	//	vbox.Append(hbox, false)
+	//
+	grid := ui.NewGrid()
+	grid.SetPadded(true)
+	vbox.Append(grid, false)
 
-	hbox := ui.NewHorizontalBox()
-	hbox.SetPadded(true)
-	vbox.Append(hbox, false)
-	currentDirectory := ui.NewEntry()
+	//	hbox.Append(currentDirectory, false)
 	currentDirectory.SetReadOnly(false)
 	currentDirectory.SetText(m4remoteLocation)
-	vbox.Append(currentDirectory, false)
+	//vbox.Append(currentDirectory, false)
 	browse := ui.NewButton("Browse")
-	vbox.Append(browse, false)
+	browse.OnClicked(browseM4)
+	//	hbox.Append(browse, false)
+	grid.Append(browse,
+		0, 1, 1, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
+	grid.Append(currentDirectory,
+		1, 1, 1, 1,
+		true, ui.AlignFill, false, ui.AlignFill)
+	//vbox.Append(browse, false)
 	/*	group := ui.NewGroup("Current remote directory")
 		group.SetMargined(true)
 		vbox.Append(group, true)
@@ -212,7 +278,7 @@ func makeM4DiskBrowser() ui.Control {
 	/*entryForm2 := ui.NewForm()
 	entryForm2.SetPadded(true)
 	vbox.Append(entryForm2, true) */
-	browser := makeSampleBrowser()
+
 	table := ui.NewTable(&ui.TableParams{
 		Model:                         ui.NewTableModel(browser),
 		RowBackgroundColorModelColumn: 3,

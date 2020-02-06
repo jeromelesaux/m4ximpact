@@ -5,3 +5,4 @@ Todo :
 - implementer le bouton navigate dans le browser 
 - implementer la tab selected file avec bouton sauvegarder avec ouverture du finder, et un bouton envoie de mail directement
 - connecter l'application au client m4 
+- configuration de sauvegarde à faire
