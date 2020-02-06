@@ -1,0 +1,7 @@
+Todo : 
+
+- probleme d'affichage du browser
+- path courant qui ne s'affiche pas 
+- implementer le bouton navigate dans le browser 
+- implementer la tab selected file avec bouton sauvegarder avec ouverture du finder, et un bouton envoie de mail directement
+- connecter l'application au client m4 
