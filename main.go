@@ -17,7 +17,7 @@ func main() {
 }
 
 func setupUI() {
-	mainwin = ui.NewWindow("M4xImpact", 600, 400, true)
+	mainwin = ui.NewWindow("M4 backup (Impact)", 600, 400, true)
 	mainwin.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true

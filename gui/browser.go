@@ -140,7 +140,6 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 		} else {
 			return ui.TableString("")
 		}
-
 	case 3:
 		t := ui.TableString("")
 		if row < len(mb.m4Dir.Nodes) {
@@ -201,12 +200,16 @@ func MakeM4DiskBrowser() ui.Control {
 	browse := ui.NewButton("Browse")
 	browse.OnClicked(browseM4)
 	//	hbox.Append(browse, false)
+	goBackButton := ui.NewButton("Go back")
+	goBackButton.OnClicked(goBack)
+
 	grid.Append(browse,
 		0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
 	grid.Append(currentDirectory,
 		1, 1, 1, 1,
 		true, ui.AlignFill, false, ui.AlignFill)
+	vbox.Append(goBackButton, false)
 	m4BrowserModel = ui.NewTableModel(m4Browser)
 	table := ui.NewTable(&ui.TableParams{
 		Model:                         m4BrowserModel,
@@ -274,5 +277,9 @@ func removeFile(i int, m *modelBrowser) {
 }
 
 func browseM4(*ui.Button) {
+
+}
+
+func goBack(*ui.Button) {
 
 }
