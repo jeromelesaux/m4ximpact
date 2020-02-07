@@ -3,10 +3,15 @@ Todo :
 - probleme d'affichage du browser : done 
 - path courant qui ne s'affiche pas  : done 
 - implementer le bouton navigate dans le browser : done 
-- implementer la tab selected file avec bouton sauvegarder avec ouverture du finder, et un bouton envoie de mail directement
+- configuration de sauvegarde à faire : done 
+- implementer la tab selected file avec bouton sauvegarder avec ouverture du finder, et un bouton envoie de mail directement done
+
 - sauvegarde des fichiers selectionnés
 - envoie des fichiers par mail 
 - connecter l'application au client m4 
-- configuration de sauvegarde à faire : done 
 - ajouter un bouton go back dans le browser
 - tester sur machine réelle 
+- ouvrir un mailer : 
+    - sous macos : open -a Mail Todo.txt
+    - sous windows : cmd [registry get HKEY_CLASSES_ROOT\\mailto\\shell\\open\\command {}] /a Todo.txt 
+    - sous linux : xdg-open mailto://
