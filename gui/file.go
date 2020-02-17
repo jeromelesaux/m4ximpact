@@ -1,6 +1,12 @@
 package gui
 
 import (
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/andlabs/ui"
 )
 
@@ -11,8 +17,48 @@ var (
 	updatedByFileTable = false
 )
 
+// export files to local harddrive
 func exportFiles(b *ui.Button) {
-
+	path, err := os.Getwd()
+	if err != nil {
+		ui.MsgBoxError(Mainwin, "Error in folder",
+			err.Error())
+		return
+	}
+	// make root directory
+	t := time.Now()
+	folderName := t.Format("2006-01-02")
+	fmt.Fprintf(os.Stdout, "Creating folder %s\n", folderName)
+	rootpath := filepath.Join(path, folderName)
+	if err := os.MkdirAll(rootpath, os.ModePerm); err != nil {
+		ui.MsgBoxError(Mainwin, "Error in folder creation",
+			err.Error())
+		return
+	}
+	// download all selected files
+	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
+		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
+		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
+		fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
+		content, err := m4Browser.m4client.DownloadContent(folder + "/" + filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) \n", folder, filename)
+			continue
+		}
+		folderFilename := filepath.Join(rootpath, folder)
+		_, err = os.Stat(folderFilename)
+		// create folder and sub folder if not exists
+		if os.IsNotExist(err) {
+			if err = os.MkdirAll(folderFilename, os.ModePerm); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while creating directory %s error %v \n", folderFilename, err)
+				continue
+			}
+		}
+		// copy file locally
+		if err = ioutil.WriteFile(filepath.Join(folderFilename, filename), content, os.ModePerm); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", filename, err)
+		}
+	}
 }
 
 func sendFilesByMail(b *ui.Button) {

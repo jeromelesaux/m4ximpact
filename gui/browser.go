@@ -58,6 +58,7 @@ func (mb *modelBrowser) Clean() {
 	mb.filesCheckStates = make([]bool, len(mb.m4Dir.Nodes))
 }
 
+// navigate actions from a folder
 func (mb *modelBrowser) Navigate(m *ui.TableModel, row int) {
 	rowsBefore := len(mb.m4Dir.Nodes)
 	remotePath := mb.m4Dir.CurrentPath + "/" + mb.m4Dir.Nodes[row].Name
@@ -156,6 +157,7 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 	return ui.TableString("")
 }
 
+// call m4 card and update browser ui
 func callM4AndUpdateBrowser(m *modelBrowser) {
 	err, dir := m.m4client.GetDir(m.m4Dir.CurrentPath)
 	if err != nil {
@@ -308,5 +310,6 @@ func browseM4(*ui.Button) {
 }
 
 func goBack(*ui.Button) {
-
+	m4Browser.m4Dir.CurrentPath += "../"
+	callM4AndUpdateBrowser(m4Browser)
 }
