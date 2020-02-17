@@ -5,13 +5,14 @@ Todo :
 - implementer le bouton navigate dans le browser : done 
 - configuration de sauvegarde à faire : done 
 - implementer la tab selected file avec bouton sauvegarder avec ouverture du finder, et un bouton envoie de mail directement done
+- sauvegarde des fichiers selectionnés : done
+- connecter l'application au client m4 : done 
+- ajouter un bouton go back dans le browser ou go upper : done 
 
-- sauvegarde des fichiers selectionnés
 - envoie des fichiers par mail 
-- connecter l'application au client m4 
-- ajouter un bouton go back dans le browser ou go upper
 - tester sur machine réelle 
 - ouvrir un mailer : 
     - sous macos : open -a Mail Todo.txt
     - sous windows : cmd [registry get HKEY_CLASSES_ROOT\\mailto\\shell\\open\\command {}] /a Todo.txt  sinon start outlook.exe /a file.attached
-    - sous linux : xdg-open mailto://compilation sous windows : CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc  CXX=x86_64-w64-mingw32-g++ CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build
+    - sous linux : xdg-open mailto://
+-- compilation sous windows : CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc  CXX=x86_64-w64-mingw32-g++ CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build
