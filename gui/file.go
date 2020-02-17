@@ -80,7 +80,7 @@ func files() []string {
 	if err != nil {
 		ui.MsgBoxError(Mainwin, "Error in folder",
 			err.Error())
-		return
+		return filespaths
 	}
 	t := time.Now()
 	folderName := t.Format("2006-01-02")
@@ -91,7 +91,6 @@ func files() []string {
 			err.Error())
 		return filespaths
 	}
-	onError := false
 	// download all selected files
 	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
 		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
