@@ -5,15 +5,16 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 var (
-	macos_mail_cmd   = "open -a Mail"
-	windows_mail_cmd = "start outlook.exe /a"
-	unix_mail_cmd    = "xdg-open mailto://"
+	macos_mail_cmd   = []string{"open", "-a", "Mail"}
+	windows_mail_cmd = []string{"start", "outlook.exe", "/a"}
+	unix_mail_cmd    = []string{"xdg-open", "mailto://"}
 )
 
-func sendmail_cmd() string {
+func sendmail_cmd() []string {
 	switch runtime.GOOS {
 	case "windows":
 		return windows_mail_cmd
@@ -22,11 +23,16 @@ func sendmail_cmd() string {
 	case "darwin":
 		return macos_mail_cmd
 	}
-	return ""
+	return []string{""}
 }
 
 func Sendmail(attachedFiles []string) error {
-	cmd := exec.Command(sendmail_cmd(), attachedFiles...)
+	cmds := sendmail_cmd()
+	arguments := make([]string, 0)
+	arguments = append(arguments, cmds[1:]...)
+	arguments = append(arguments, attachedFiles...)
+	fmt.Fprintf(os.Stdout, "Executing %s with arguments %s\n", cmds[0], strings.Join(arguments, " "))
+	cmd := exec.Command(cmds[0], arguments...)
 	err := cmd.Start()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while opening mail with error %v\n", err)
