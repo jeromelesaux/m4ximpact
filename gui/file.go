@@ -35,6 +35,7 @@ func exportFiles(b *ui.Button) {
 			err.Error())
 		return
 	}
+	onError := false
 	// download all selected files
 	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
 		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
@@ -43,6 +44,7 @@ func exportFiles(b *ui.Button) {
 		content, err := m4Browser.m4client.DownloadContent(folder + "/" + filename)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) \n", folder, filename)
+			onError = true
 			continue
 		}
 		folderFilename := filepath.Join(rootpath, folder)
@@ -51,13 +53,19 @@ func exportFiles(b *ui.Button) {
 		if os.IsNotExist(err) {
 			if err = os.MkdirAll(folderFilename, os.ModePerm); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while creating directory %s error %v \n", folderFilename, err)
+				onError = true
 				continue
 			}
 		}
 		// copy file locally
 		if err = ioutil.WriteFile(filepath.Join(folderFilename, filename), content, os.ModePerm); err != nil {
 			fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", filename, err)
+			onError = true
 		}
+	}
+	if onError {
+		ui.MsgBoxError(Mainwin, "Download Error !",
+			"Errors occur when downloading files, check log to know why.")
 	}
 }
 
