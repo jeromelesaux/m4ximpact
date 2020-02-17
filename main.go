@@ -6,10 +6,6 @@ import (
 	"github.com/jeromelesaux/m4Ximpact/gui"
 )
 
-var (
-	mainwin *ui.Window
-)
-
 func main() {
 
 	ui.Main(setupUI)
@@ -17,19 +13,19 @@ func main() {
 }
 
 func setupUI() {
-	mainwin = ui.NewWindow("M4 backup (Impact)", 600, 400, true)
-	mainwin.OnClosing(func(*ui.Window) bool {
+	gui.Mainwin = ui.NewWindow("M4 backup (Impact)", 600, 400, true)
+	gui.Mainwin.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
 	})
 	ui.OnShouldQuit(func() bool {
-		mainwin.Destroy()
+		gui.Mainwin.Destroy()
 		return true
 	})
 
 	tab := ui.NewTab()
-	mainwin.SetChild(tab)
-	mainwin.SetMargined(true)
+	gui.Mainwin.SetChild(tab)
+	gui.Mainwin.SetMargined(true)
 
 	tab.Append("Browser", gui.MakeM4DiskBrowser())
 	tab.SetMargined(0, true)
@@ -37,5 +33,5 @@ func setupUI() {
 	tab.SetMargined(1, true)
 	tab.Append("Configuration", gui.MakeConfigurationPage())
 	tab.SetMargined(2, true)
-	mainwin.Show()
+	gui.Mainwin.Show()
 }

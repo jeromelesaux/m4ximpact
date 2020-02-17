@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/andlabs/ui"
@@ -25,13 +26,14 @@ type selectedFile struct {
 }
 
 type modelBrowser struct {
-	m4Dir            m4.M4Dir
+	m4Dir            *m4.M4Dir
 	filesCheckStates []bool
 	m4client         *m4.M4Client
 }
 
 func newModelBrowser() *modelBrowser {
 	m := new(modelBrowser)
+	m.m4Dir = &m4.M4Dir{}
 	m.filesCheckStates = make([]bool, 0)
 	return m
 }
@@ -60,7 +62,7 @@ func (mb *modelBrowser) Navigate(m *ui.TableModel, row int) {
 	rowsBefore := len(mb.m4Dir.Nodes)
 	remotePath := mb.m4Dir.CurrentPath + "/" + mb.m4Dir.Nodes[row].Name
 	mb.Clean()
-	updateSampleBrowser(mb)
+	callM4AndUpdateBrowser(mb)
 	mb.m4Dir.CurrentPath = remotePath
 	rowsAfter := len(mb.m4Dir.Nodes)
 	for i := 0; i < rowsBefore; i++ {
@@ -154,6 +156,29 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 	return ui.TableString("")
 }
 
+func callM4AndUpdateBrowser(m *modelBrowser) {
+	err, dir := m.m4client.GetDir(m.m4Dir.CurrentPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while calling m4 (%s) error : %v\n", m.m4client.IPClient, err)
+		ui.MsgBoxError(Mainwin, "Error while calling M4",
+			"Error while calling M4 "+m.m4client.IPClient+", error : "+err.Error())
+		return
+	}
+	m.m4Dir = dir
+	//m.m4Dir.CurrentPath = "/"
+	m.filesCheckStates = make([]bool, len(m.m4Dir.Nodes))
+	m4remoteLocation = m.m4Dir.CurrentPath
+}
+
+func makeDefaultBrowser() *modelBrowser {
+	m := newModelBrowser()
+	m.m4client = &m4.M4Client{}
+	m.m4Dir.CurrentPath = "/"
+	m.filesCheckStates = make([]bool, len(m.m4Dir.Nodes))
+	m4remoteLocation = m.m4Dir.CurrentPath
+	return m
+}
+
 func makeSampleBrowser() *modelBrowser {
 	m := newModelBrowser()
 	m.m4Dir.CurrentPath = "/home/home/documents"
@@ -180,7 +205,9 @@ func updateSampleBrowser(m *modelBrowser) {
 
 func MakeM4DiskBrowser() ui.Control {
 
-	m4Browser = makeSampleBrowser()
+	m4Browser = makeDefaultBrowser()
+
+	m4Browser.m4client.IPClient = config.M4Url
 
 	vbox := ui.NewVerticalBox()
 	vbox.SetPadded(true)
@@ -277,7 +304,7 @@ func removeFile(i int, m *modelBrowser) {
 }
 
 func browseM4(*ui.Button) {
-
+	callM4AndUpdateBrowser(m4Browser)
 }
 
 func goBack(*ui.Button) {

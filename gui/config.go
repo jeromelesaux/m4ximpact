@@ -38,6 +38,7 @@ func MakeConfigurationPage() ui.Control {
 	m4UrlButton := ui.NewButton(".Save Url.")
 	m4UrlButton.OnClicked(func(*ui.Button) {
 		config.M4Url = m4urlEntry.Text()
+		m4Browser.m4client.IPClient = config.M4Url
 		config.Save()
 		fmt.Println("Set m4 url : " + config.M4Url)
 	})
