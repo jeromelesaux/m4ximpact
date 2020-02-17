@@ -19,6 +19,10 @@ var (
 
 // export files to local harddrive
 func exportFiles(b *ui.Button) {
+	downloadFiles()
+}
+
+func downloadFiles() {
 	path, err := os.Getwd()
 	if err != nil {
 		ui.MsgBoxError(Mainwin, "Error in folder",
@@ -69,8 +73,40 @@ func exportFiles(b *ui.Button) {
 	}
 }
 
-func sendFilesByMail(b *ui.Button) {
+func files() []string {
+	filespaths := make([]string, 0)
 
+	path, err := os.Getwd()
+	if err != nil {
+		ui.MsgBoxError(Mainwin, "Error in folder",
+			err.Error())
+		return
+	}
+	t := time.Now()
+	folderName := t.Format("2006-01-02")
+	fmt.Fprintf(os.Stdout, "Creating folder %s\n", folderName)
+	rootpath := filepath.Join(path, folderName)
+	if err := os.MkdirAll(rootpath, os.ModePerm); err != nil {
+		ui.MsgBoxError(Mainwin, "Error in folder creation",
+			err.Error())
+		return filespaths
+	}
+	onError := false
+	// download all selected files
+	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
+		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
+		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
+		folderFilename := filepath.Join(rootpath, folder)
+		localFilepath := filepath.Join(folderFilename, filename)
+		filespaths = append(filespaths, localFilepath)
+	}
+	return filespaths
+}
+
+func sendFilesByMail(b *ui.Button) {
+	downloadFiles()
+	filespaths := files()
+	Sendmail(filespaths)
 }
 
 func MakeFilesTable() ui.Control {

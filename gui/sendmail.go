@@ -1,6 +1,11 @@
 package gui
 
-import "runtime"
+import (
+	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
+)
 
 var (
 	macos_mail_cmd   = "open -a Mail"
@@ -18,4 +23,16 @@ func sendmail_cmd() string {
 		return macos_mail_cmd
 	}
 	return ""
+}
+
+func Sendmail(attachedFiles []string) error {
+	cmd := exec.Command(sendmail_cmd(), attachedFiles...)
+	err := cmd.Start()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while opening mail with error %v\n", err)
+		return err
+	}
+	err = cmd.Wait()
+	fmt.Fprintf(os.Stderr, "cmd mail finished with :%v\n", err)
+	return nil
 }
