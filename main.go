@@ -6,6 +6,8 @@ import (
 	"github.com/jeromelesaux/m4Ximpact/gui"
 )
 
+var version = "0.1rc"
+
 func main() {
 
 	ui.Main(setupUI)
@@ -13,7 +15,7 @@ func main() {
 }
 
 func setupUI() {
-	gui.Mainwin = ui.NewWindow("M4 backup (Impact)", 600, 400, true)
+	gui.Mainwin = ui.NewWindow("M4 backup (Impact) Version "+version, 600, 400, true)
 	gui.Mainwin.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
