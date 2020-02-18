@@ -3,6 +3,7 @@ package gui
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/andlabs/ui"
@@ -40,7 +41,7 @@ func newModelBrowser() *modelBrowser {
 
 // nombre de fichier dans le répertoire
 func (mb *modelBrowser) NumRows(m *ui.TableModel) int {
-	return len(mb.m4Dir.Nodes)
+	return len(mb.filesCheckStates)
 }
 
 // type des colonnes dans le tableau browser
@@ -55,6 +56,44 @@ func (mb *modelBrowser) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 
 func (mb *modelBrowser) Clean() {
 	mb.m4Dir.Nodes = mb.m4Dir.Nodes[:0]
+	//mb.filesCheckStates = make([]bool, len(mb.m4Dir.Nodes))
+}
+
+func (mb *modelBrowser) Update(nbElementBefore, nbElementAfter int, m *ui.TableModel) {
+	var toUpdate, toDelete, toAdd int
+
+	if nbElementAfter > nbElementBefore {
+		toUpdate = nbElementBefore
+	} else {
+		toUpdate = nbElementAfter
+	}
+
+	toAdd = -(nbElementBefore - nbElementAfter)
+	if toAdd < 0 {
+		toAdd = 0
+	}
+
+	toDelete = (nbElementBefore - nbElementAfter)
+	if toDelete < 0 {
+		toDelete = 0
+	}
+
+	fmt.Fprintf(os.Stdout, "rows todelete[%d] toadd[%d] to update[%d]\n", toDelete, toAdd, toUpdate)
+	for i := 0; i < toUpdate; i++ {
+		fmt.Fprintf(os.Stdout, "row updated [%d]\n", i)
+		m.RowChanged(i)
+	}
+
+	for i := 0; i < toAdd; i++ {
+		fmt.Fprintf(os.Stdout, "row inserted [%d]\n", i+toUpdate)
+		m.RowInserted(i + toUpdate)
+	}
+
+	for i := toDelete + toUpdate - 1; i >= toUpdate; i-- {
+		fmt.Fprintf(os.Stdout, "row deleted [%d]\n", i)
+		m.RowDeleted(i)
+	}
+
 	mb.filesCheckStates = make([]bool, len(mb.m4Dir.Nodes))
 }
 
@@ -62,22 +101,12 @@ func (mb *modelBrowser) Clean() {
 func (mb *modelBrowser) Navigate(m *ui.TableModel, row int) {
 	rowsBefore := len(mb.m4Dir.Nodes)
 	remotePath := mb.m4Dir.CurrentPath + "/" + mb.m4Dir.Nodes[row].Name
+	mb.m4Dir.CurrentPath = remotePath
 	mb.Clean()
 	callM4AndUpdateBrowser(mb)
 	mb.m4Dir.CurrentPath = remotePath
 	rowsAfter := len(mb.m4Dir.Nodes)
-	for i := 0; i < rowsBefore; i++ {
-		m.RowChanged(i)
-	}
-	if rowsBefore > rowsAfter {
-		for i := rowsAfter; i < rowsBefore; i++ {
-			m.RowDeleted(i)
-		}
-	} else {
-		for i := rowsBefore; i < rowsAfter; i++ {
-			m.RowInserted(i)
-		}
-	}
+	mb.Update(rowsBefore, rowsAfter, m)
 	currentDirectory.SetText(mb.m4Dir.CurrentPath)
 }
 
@@ -135,14 +164,15 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 		}
 		return t
 	case 2:
-		if mb.m4Dir.Nodes[row].IsDirectory {
-			return ui.TableString("x")
+		if row < len(mb.m4Dir.Nodes) {
+			if mb.m4Dir.Nodes[row].IsDirectory {
+				return ui.TableString("x")
+			}
+			if mb.filesCheckStates[row] {
+				return ui.TableString("selected")
+			}
 		}
-		if mb.filesCheckStates[row] {
-			return ui.TableString("selected")
-		} else {
-			return ui.TableString("")
-		}
+		return ui.TableString("")
 	case 3:
 		t := ui.TableString("")
 		if row < len(mb.m4Dir.Nodes) {
@@ -306,10 +336,21 @@ func removeFile(i int, m *modelBrowser) {
 }
 
 func browseM4(*ui.Button) {
+	rowsBefore := len(m4Browser.m4Dir.Nodes)
 	callM4AndUpdateBrowser(m4Browser)
+
+	rowsAfter := len(m4Browser.m4Dir.Nodes)
+	m4Browser.Update(rowsBefore, rowsAfter, m4BrowserModel)
+	currentDirectory.SetText(m4Browser.m4Dir.CurrentPath)
+
 }
 
 func goBack(*ui.Button) {
-	m4Browser.m4Dir.CurrentPath += "../"
+	m4Browser.m4Dir.CurrentPath += "/.."
+	m4Browser.m4Dir.CurrentPath = filepath.Clean(m4Browser.m4Dir.CurrentPath)
+	rowsBefore := len(m4Browser.m4Dir.Nodes)
 	callM4AndUpdateBrowser(m4Browser)
+	rowsAfter := len(m4Browser.m4Dir.Nodes)
+	m4Browser.Update(rowsBefore, rowsAfter, m4BrowserModel)
+	currentDirectory.SetText(m4Browser.m4Dir.CurrentPath)
 }

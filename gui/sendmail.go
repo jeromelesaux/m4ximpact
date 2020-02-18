@@ -10,7 +10,7 @@ import (
 
 var (
 	macos_mail_cmd   = []string{"open", "-a", "Mail"}
-	windows_mail_cmd = []string{"start", "outlook.exe", "/a"}
+	windows_mail_cmd = []string{"start", "wab", "/a"}
 	unix_mail_cmd    = []string{"xdg-open", "mailto://"}
 )
 

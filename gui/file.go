@@ -47,7 +47,7 @@ func downloadFiles() {
 		fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
 		content, err := m4Browser.m4client.DownloadContent(folder + "/" + filename)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) \n", folder, filename)
+			fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) error : %v\n", folder, filename, err)
 			onError = true
 			continue
 		}
@@ -168,9 +168,15 @@ func (mb *modelFilesTable) NumRows(m *ui.TableModel) int {
 func (mb *modelFilesTable) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	switch column {
 	case 0:
-		return ui.TableString(selectedFiles[row].Directory)
+		if row < len(selectedFiles) {
+			return ui.TableString(selectedFiles[row].Directory)
+		}
+		return ui.TableString("")
 	case 1:
-		return ui.TableString(selectedFiles[row].Name)
+		if row < len(selectedFiles) {
+			return ui.TableString(selectedFiles[row].Name)
+		}
+		return ui.TableString("")
 	case 2:
 		return ui.TableString("remove")
 	}
