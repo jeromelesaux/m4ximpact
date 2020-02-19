@@ -10,7 +10,8 @@ var configFilepath = "m4config.json"
 var defaultConfig = &Config{M4Url: "cpc"}
 
 type Config struct {
-	M4Url string
+	M4Url     string
+	MailerApp string
 }
 
 func NewConfig() *Config {

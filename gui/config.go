@@ -34,15 +34,21 @@ func MakeConfigurationPage() ui.Control {
 	m4urlEntry.SetText(config.M4Url)
 	confForm.Append("M4 Address", m4urlEntry, false)
 
+	mailerEntry := ui.NewEntry()
+	mailerEntry.SetReadOnly(false)
+	mailerEntry.SetText(config.MailerApp)
+	confForm.Append("Mail application", mailerEntry, false)
+
 	// m4 button to set url
-	m4UrlButton := ui.NewButton(".Save Url.")
-	m4UrlButton.OnClicked(func(*ui.Button) {
+	saveConfigButton := ui.NewButton(".Save Configuration.")
+	saveConfigButton.OnClicked(func(*ui.Button) {
 		config.M4Url = m4urlEntry.Text()
 		m4Browser.m4client.IPClient = config.M4Url
+		config.MailerApp = mailerEntry.Text()
 		config.Save()
-		fmt.Println("Set m4 url : " + config.M4Url)
+		fmt.Println("Set m4 url : " + config.M4Url + " , and MailerApp : " + config.MailerApp)
 	})
+	confForm.Append("Set", saveConfigButton, false)
 
-	confForm.Append("Set", m4UrlButton, false)
 	return vbox
 }
