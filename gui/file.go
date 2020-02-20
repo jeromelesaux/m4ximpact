@@ -106,33 +106,49 @@ func downloadFiles() {
 	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
 		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
 		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
-		fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
-		content, err := m4Browser.m4client.DownloadContent(folder + "/" + filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) error : %v\n", folder, filename, err)
-			onError = true
-			continue
-		}
-		folderFilename := filepath.Join(rootpath, folder)
-		_, err = os.Stat(folderFilename)
-		// create folder and sub folder if not exists
-		if os.IsNotExist(err) {
-			if err = os.MkdirAll(folderFilename, os.ModePerm); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while creating directory %s error %v \n", folderFilename, err)
+		isDirectory := string(tableUi.CellValue(tableFilesModel, i, 2).(ui.TableString))
+		if isDirectory == "folder" {
+			m4BackupFolder(folder+"/"+filename, rootpath)
+		} else {
+			fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
+			nok := downloadM4File(rootpath, folder, filename)
+			if !nok {
 				onError = true
-				continue
 			}
-		}
-		// copy file locally
-		if err = ioutil.WriteFile(filepath.Join(folderFilename, filename), content, os.ModePerm); err != nil {
-			fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", filename, err)
-			onError = true
 		}
 	}
 	if onError {
 		ui.MsgBoxError(Mainwin, "Download Error !",
 			"Errors occur when downloading files, check log to know why.")
+	} else {
+		ui.MsgBox(Mainwin, "Download ended.",
+			"Complete download and can be found here "+rootpath)
 	}
+}
+
+func downloadM4File(localpath, m4folder, m4filename string) bool {
+	fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", m4folder, m4filename)
+	content, err := m4Browser.m4client.DownloadContent(m4folder + "/" + m4filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) error : %v\n", m4folder, m4filename, err)
+
+		return false
+	}
+	folderFilename := filepath.Join(localpath, m4folder)
+	_, err = os.Stat(folderFilename)
+	// create folder and sub folder if not exists
+	if os.IsNotExist(err) {
+		if err = os.MkdirAll(folderFilename, os.ModePerm); err != nil {
+			fmt.Fprintf(os.Stderr, "Error while creating directory %s error %v \n", folderFilename, err)
+			return false
+		}
+	}
+	// copy file locally
+	if err = ioutil.WriteFile(filepath.Join(folderFilename, m4filename), content, os.ModePerm); err != nil {
+		fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", m4filename, err)
+		return false
+	}
+	return true
 }
 
 func files() []string {
@@ -204,7 +220,8 @@ func MakeFilesTable() ui.Control {
 	vbox.Append(table, true)
 	table.AppendTextColumn("Filepath", 0, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Filename", 1, ui.TableModelColumnNeverEditable, nil)
-	table.AppendButtonColumn("remove", 2, ui.TableModelColumnAlwaysEditable)
+	table.AppendTextColumn("Folder", 2, ui.TableModelColumnNeverEditable, nil)
+	table.AppendButtonColumn("remove", 3, ui.TableModelColumnAlwaysEditable)
 	return vbox
 }
 
@@ -221,6 +238,7 @@ func (mb *modelFilesTable) ColumnTypes(m *ui.TableModel) []ui.TableValue {
 	return []ui.TableValue{
 		ui.TableString(""), // chemin du fichier
 		ui.TableString(""), // nom du fichier
+		ui.TableString(""), // is directory
 		ui.TableString(""), // selection du fichier pour récupération
 	}
 }
@@ -243,6 +261,13 @@ func (mb *modelFilesTable) CellValue(m *ui.TableModel, row, column int) ui.Table
 		}
 		return ui.TableString("")
 	case 2:
+		if row < len(selectedFiles) {
+			if selectedFiles[row].IsDirectory {
+				return ui.TableString("folder")
+			}
+		}
+		return ui.TableString("")
+	case 3:
 		return ui.TableString("remove")
 	}
 
@@ -252,11 +277,13 @@ func (mb *modelFilesTable) CellValue(m *ui.TableModel, row, column int) ui.Table
 func (mb *modelFilesTable) SetCellValue(m *ui.TableModel, row, column int, value ui.TableValue) {
 
 	switch column {
-	case 2:
+	case 3:
 		if !insertingRow && !updatedByFileTable {
-			path := selectedFiles[row].Directory
-			file := selectedFiles[row].Name
-			unselectFile(path, file)
+			if row < len(selectedFiles) {
+				path := selectedFiles[row].Directory
+				file := selectedFiles[row].Name
+				unselectFile(path, file)
+			}
 			//		removeFileWithData(path, file)
 			//	m.RowDeleted(row)
 		}
@@ -264,23 +291,29 @@ func (mb *modelFilesTable) SetCellValue(m *ui.TableModel, row, column int, value
 
 }
 
-func insertSelectedFile(path, name string) {
+func insertSelectedFile(path, name string, isDirectory bool) {
 	insertingRow = true
 	index := len(selectedFiles) - 1
+	folder := "folder"
 	tableUi.SetCellValue(tableFilesModel, index, 0, ui.TableString(path))
 	tableUi.SetCellValue(tableFilesModel, index, 1, ui.TableString(name))
-	tableUi.SetCellValue(tableFilesModel, index, 2, ui.TableString(""))
+	if !isDirectory {
+		folder = ""
+	}
+	tableUi.SetCellValue(tableFilesModel, index, 2, ui.TableString(folder))
+	tableUi.SetCellValue(tableFilesModel, index, 3, ui.TableString(""))
 	tableFilesModel.RowInserted(index)
 	insertingRow = false
 }
 
 func unselectFileInFilesUi(path, name string) {
-	if path == m4Browser.m4Dir.CurrentPath {
-		for i, v := range selectedFiles {
-			if v.Name == name {
-				tableFilesModel.RowDeleted(i)
-				break
-			}
+	indexToRemove := -1
+	for i, v := range selectedFiles {
+		if v.Name == name {
+			tableFilesModel.RowDeleted(i)
+			indexToRemove = i
+			break
 		}
 	}
+	selectedFiles = append(selectedFiles[:indexToRemove], selectedFiles[indexToRemove+1:]...)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/andlabs/ui"
@@ -12,6 +13,7 @@ import (
 
 var (
 	m4remoteLocation string = "/"
+	slash                   = regexp.MustCompile("/+")
 	currentDirectory *ui.Entry
 	selectedFiles    = make([]selectedFile, 0)
 	m4Browser        *modelBrowser
@@ -22,8 +24,9 @@ type FileSelectModel interface {
 }
 
 type selectedFile struct {
-	Name      string
-	Directory string
+	Name        string
+	Directory   string
+	IsDirectory bool
 }
 
 type modelBrowser struct {
@@ -100,7 +103,7 @@ func (mb *modelBrowser) Update(nbElementBefore, nbElementAfter int, m *ui.TableM
 // navigate actions from a folder
 func (mb *modelBrowser) Navigate(m *ui.TableModel, row int) {
 	rowsBefore := len(mb.m4Dir.Nodes)
-	remotePath := mb.m4Dir.CurrentPath + "/" + mb.m4Dir.Nodes[row].Name
+	remotePath := slash.ReplaceAllString(mb.m4Dir.CurrentPath+"/"+mb.m4Dir.Nodes[row].Name, "/")
 	mb.m4Dir.CurrentPath = remotePath
 	mb.Clean()
 	callM4AndUpdateBrowser(mb)
@@ -114,20 +117,18 @@ func (mb *modelBrowser) SetCellValue(m *ui.TableModel, row, column int, value ui
 
 	switch column {
 	case 2:
-		if !mb.m4Dir.Nodes[row].IsDirectory {
-			if !mb.filesCheckStates[row] {
-				mb.filesCheckStates[row] = true
-				addFile(row, mb)
-				insertSelectedFile(mb.m4Dir.CurrentPath, mb.m4Dir.Nodes[row].Name)
-			} else {
-				dir := mb.m4Dir.CurrentPath
-				name := mb.m4Dir.Nodes[row].Name
-				unselectFileInFilesUi(dir, name)
-				mb.filesCheckStates[row] = false
-				removeFile(row, mb)
-			}
-			m.RowChanged(row)
+		if !mb.filesCheckStates[row] {
+			mb.filesCheckStates[row] = true
+			addFile(row, mb)
+			insertSelectedFile(mb.m4Dir.CurrentPath, mb.m4Dir.Nodes[row].Name, mb.m4Dir.Nodes[row].IsDirectory)
+		} else {
+			dir := mb.m4Dir.CurrentPath
+			name := mb.m4Dir.Nodes[row].Name
+			unselectFileInFilesUi(dir, name)
+			mb.filesCheckStates[row] = false
+			removeFile(row, mb)
 		}
+		m.RowChanged(row)
 	case 3:
 		if row < len(mb.m4Dir.Nodes) {
 			if mb.m4Dir.Nodes[row].IsDirectory {
@@ -140,14 +141,19 @@ func (mb *modelBrowser) SetCellValue(m *ui.TableModel, row, column int, value ui
 }
 
 func unselectFile(directory, name string) {
+	found := false
 	if directory == m4Browser.m4Dir.CurrentPath {
 		for i, v := range m4Browser.m4Dir.Nodes {
 			if v.Name == name {
 				m4Browser.SetCellValue(m4BrowserModel, i, 2, ui.TableString(""))
 				m4BrowserModel.RowChanged(i)
+				found = true
 				break
 			}
 		}
+	}
+	if found == false {
+		unselectFileInFilesUi(directory, name)
 	}
 }
 
@@ -165,9 +171,6 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 		return t
 	case 2:
 		if row < len(mb.m4Dir.Nodes) {
-			if mb.m4Dir.Nodes[row].IsDirectory {
-				return ui.TableString("x")
-			}
 			if mb.filesCheckStates[row] {
 				return ui.TableString("selected")
 			}
@@ -197,6 +200,7 @@ func callM4AndUpdateBrowser(m *modelBrowser) {
 		return
 	}
 	m.m4Dir = dir
+	m.m4Dir.CurrentPath = slash.ReplaceAllString(m.m4Dir.CurrentPath, "/")
 	//m.m4Dir.CurrentPath = "/"
 	m.filesCheckStates = make([]bool, len(m.m4Dir.Nodes))
 	m4remoteLocation = m.m4Dir.CurrentPath
@@ -288,6 +292,7 @@ func addFile(i int, m *modelBrowser) {
 	if i < len(m.m4Dir.Nodes) {
 		f := m.m4Dir.Nodes[i].Name
 		d := m.m4Dir.CurrentPath
+		isDir := m.m4Dir.Nodes[i].IsDirectory
 		isPresent := false
 		for _, v := range selectedFiles {
 			if v.Name == f && v.Directory == d {
@@ -298,8 +303,9 @@ func addFile(i int, m *modelBrowser) {
 		if !isPresent {
 			fmt.Println("file " + f + " directory :" + d + " selected.")
 			selectedFiles = append(selectedFiles, selectedFile{
-				Name:      f,
-				Directory: d,
+				Name:        f,
+				Directory:   d,
+				IsDirectory: isDir,
 			})
 
 		}
@@ -339,16 +345,15 @@ func removeFile(i int, m *modelBrowser) {
 func browseM4(*ui.Button) {
 	rowsBefore := len(m4Browser.m4Dir.Nodes)
 	callM4AndUpdateBrowser(m4Browser)
-
 	rowsAfter := len(m4Browser.m4Dir.Nodes)
 	m4Browser.Update(rowsBefore, rowsAfter, m4BrowserModel)
 	currentDirectory.SetText(m4Browser.m4Dir.CurrentPath)
-
 }
 
 func goBack(*ui.Button) {
 	m4Browser.m4Dir.CurrentPath += "/.."
 	m4Browser.m4Dir.CurrentPath = filepath.Clean(m4Browser.m4Dir.CurrentPath)
+	m4Browser.m4Dir.CurrentPath = slash.ReplaceAllString(m4Browser.m4Dir.CurrentPath, "/")
 	rowsBefore := len(m4Browser.m4Dir.Nodes)
 	callM4AndUpdateBrowser(m4Browser)
 	rowsAfter := len(m4Browser.m4Dir.Nodes)

@@ -15,7 +15,7 @@ func main() {
 }
 
 func setupUI() {
-	gui.Mainwin = ui.NewWindow("M4 backup (Impact) Version "+version, 600, 400, true)
+	gui.Mainwin = ui.NewWindow("M4 backup (Impact) Version "+version, 800, 500, true)
 	gui.Mainwin.OnClosing(func(*ui.Window) bool {
 		ui.Quit()
 		return true
