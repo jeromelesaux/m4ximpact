@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/andlabs/ui"
 	_ "github.com/andlabs/ui/winmanifest"
-	"github.com/jeromelesaux/m4Ximpact/gui"
+	"github.com/jeromelesaux/m4ximpact/gui"
 )
 
 var version = "0.1rc"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/andlabs/ui"
-	"github.com/jeromelesaux/m4Ximpact/common"
+	"github.com/jeromelesaux/m4ximpact/common"
 )
 
 var (
