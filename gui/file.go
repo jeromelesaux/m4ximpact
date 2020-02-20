@@ -22,6 +22,68 @@ func exportFiles(b *ui.Button) {
 	downloadFiles()
 }
 
+func completeM4Backup(b *ui.Button) {
+	path, err := os.Getwd()
+	if err != nil {
+		ui.MsgBoxError(Mainwin, "Error in folder",
+			err.Error())
+		return
+	}
+	// make root directory
+	t := time.Now()
+	folderName := t.Format("2006-01-02")
+	fmt.Fprintf(os.Stdout, "Creating folder %s\n", folderName)
+	rootpath := filepath.Join(path, folderName)
+	m4BackupFolder("/", rootpath)
+}
+
+func m4BackupFolder(remotefolder, localfolder string) {
+	// create local folder
+	if err := os.MkdirAll(localfolder, os.ModePerm); err != nil {
+		ui.MsgBoxError(Mainwin, "Error in folder creation",
+			err.Error())
+		return
+	}
+	// call remote m4 to get the remotefolder content
+	err, dir := m4Browser.m4client.GetDir(remotefolder)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error while calling m4 (%s) error : %v\n", m4Browser.m4client.IPClient, err)
+		ui.MsgBoxError(Mainwin, "Error while calling M4",
+			"Error while calling M4 "+m4Browser.m4client.IPClient+", error : "+err.Error())
+		return
+	}
+	for i := 0; i < len(dir.Nodes); i++ {
+		node := dir.Nodes[i]
+		if node.IsDirectory {
+			// directory get content folder
+			m4BackupFolder(remotefolder+"/"+node.Name, filepath.Join(localfolder, node.Name))
+		} else {
+			// save file in localfolder
+			folder := dir.CurrentPath
+			filename := node.Name
+			fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
+			content, err := m4Browser.m4client.DownloadContent(folder + "/" + filename)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) error : %v\n", folder, filename, err)
+				continue
+			}
+			folderFilename := filepath.Join(localfolder, folder)
+			_, err = os.Stat(folderFilename)
+			// create folder and sub folder if not exists
+			if os.IsNotExist(err) {
+				if err = os.MkdirAll(folderFilename, os.ModePerm); err != nil {
+					fmt.Fprintf(os.Stderr, "Error while creating directory %s error %v \n", folderFilename, err)
+					continue
+				}
+			}
+			// copy file locally
+			if err = ioutil.WriteFile(filepath.Join(folderFilename, filename), content, os.ModePerm); err != nil {
+				fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", filename, err)
+			}
+		}
+	}
+}
+
 func downloadFiles() {
 	path, err := os.Getwd()
 	if err != nil {
@@ -114,6 +176,9 @@ func MakeFilesTable() ui.Control {
 	vbox := ui.NewVerticalBox()
 	vbox.SetPadded(true)
 
+	backupAll := ui.NewButton("Backup all your M4 content")
+	backupAll.OnClicked(completeM4Backup)
+	vbox.Append(backupAll, false)
 	grid := ui.NewGrid()
 	grid.SetPadded(true)
 	vbox.Append(grid, false)
