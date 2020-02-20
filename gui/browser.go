@@ -12,8 +12,8 @@ import (
 
 var (
 	m4remoteLocation string = "/"
-	currentDirectory        = ui.NewEntry()
-	selectedFiles           = make([]selectedFile, 0)
+	currentDirectory *ui.Entry
+	selectedFiles    = make([]selectedFile, 0)
 	m4Browser        *modelBrowser
 	m4BrowserModel   *ui.TableModel
 )
@@ -253,6 +253,7 @@ func MakeM4DiskBrowser() ui.Control {
 	vbox.Append(grid, false)
 
 	//	hbox.Append(currentDirectory, false)
+	currentDirectory = ui.NewEntry()
 	currentDirectory.SetReadOnly(false)
 	currentDirectory.SetText(m4remoteLocation)
 	//vbox.Append(currentDirectory, false)
