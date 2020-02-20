@@ -8,11 +8,11 @@ Todo :
 - sauvegarde des fichiers selectionnés : done
 - connecter l'application au client m4 : done 
 - ajouter un bouton go back dans le browser ou go upper : done 
-
-- envoie des fichiers par mail 
-- tester sur machine réelle 
+- backup complet - done
+- envoie des fichiers par mail  - done
+- tester sur machine réelle - done
 - ouvrir un mailer : 
-    - sous macos : open -a Mail Todo.txt
+    - sous macos : open -a Mail Todo.txt - done 
     - sous windows : cmd [registry get HKEY_CLASSES_ROOT\\mailto\\shell\\open\\command {}] /a Todo.txt  sinon start outlook.exe /a file.attached
-    - sous linux : xdg-open mailto://
--- compilation sous windows : CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc  CXX=x86_64-w64-mingw32-g++ CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build
+    - sous linux : xdg-open mailto:// - done 
+-- compilation sous windows : CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc  CXX=x86_64-w64-mingw32-g++ CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build - done

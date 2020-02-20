@@ -20,9 +20,9 @@ endif
 
 
 build: 
-	#@echo "Compilation for linux"
-	#CGO_ENABLED=1 CC=gcc CXX=g++ GOOS=linux go build ${LDFLAGS} -o m4backup $(SOURCEDIR)/main.go
-	#zip m4backup-$(appversion)-linux.zip m4backup 
+#	@echo "Compilation for linux"
+#	CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o m4backup $(SOURCEDIR)/main.go
+#	zip m4backup-$(appversion)-linux.zip m4backup 
 	@echo "Compilation for windows"
 	CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc  CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64  go build ${LDFLAGS} -o m4backup.exe $(SOURCEDIR)/main.go
 	zip m4backup-$(appversion)-windows.zip m4backup.exe
