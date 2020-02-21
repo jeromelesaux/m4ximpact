@@ -25,7 +25,7 @@ build:
 #	zip m4backup-$(appversion)-linux.zip m4backup 
 	@echo "Compilation for windows"
 	CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc  CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64  go build ${LDFLAGS} -o m4backup.exe $(SOURCEDIR)/main.go
-	zip m4backup-$(appversion)-windows.zip m4backup.exe
+	zip m4backup-$(appversion)-windows.zip m4backup.exe windows/*
 	@echo "Compilation for macos"
 	GOOS=darwin go build ${LDFLAGS} -o m4backup $(SOURCEDIR)/main.go
 	zip m4backup-$(appversion)-macos.zip m4backup 
