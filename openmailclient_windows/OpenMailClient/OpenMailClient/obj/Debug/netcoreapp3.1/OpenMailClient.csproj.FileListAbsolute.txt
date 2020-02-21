@@ -1,0 +1,11 @@
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp3.1\OpenMailClient.exe
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp3.1\OpenMailClient.deps.json
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp3.1\OpenMailClient.runtimeconfig.json
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp3.1\OpenMailClient.runtimeconfig.dev.json
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp3.1\OpenMailClient.dll
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp3.1\OpenMailClient.pdb
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp3.1\OpenMailClient.csprojAssemblyReference.cache
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp3.1\OpenMailClient.AssemblyInfoInputs.cache
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp3.1\OpenMailClient.AssemblyInfo.cs
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp3.1\OpenMailClient.dll
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp3.1\OpenMailClient.pdb

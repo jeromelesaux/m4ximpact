@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OpenMailClient": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\User\\Todo.txt C:\\Users\\User\\123.txt"
+    }
+  }
+}

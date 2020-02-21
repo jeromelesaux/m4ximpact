@@ -1,0 +1,10 @@
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp2.0\OpenMailClient.deps.json
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp2.0\OpenMailClient.runtimeconfig.json
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp2.0\OpenMailClient.runtimeconfig.dev.json
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp2.0\OpenMailClient.dll
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\bin\Debug\netcoreapp2.0\OpenMailClient.pdb
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp2.0\OpenMailClient.csprojAssemblyReference.cache
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp2.0\OpenMailClient.AssemblyInfoInputs.cache
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp2.0\OpenMailClient.AssemblyInfo.cs
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp2.0\OpenMailClient.dll
+C:\Users\User\Source\Repos\OpenMailClient\OpenMailClient\obj\Debug\netcoreapp2.0\OpenMailClient.pdb
