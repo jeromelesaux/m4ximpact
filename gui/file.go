@@ -57,33 +57,20 @@ func m4BackupFolder(remotefolder, localfolder string) {
 	for i := 0; i < items; i++ {
 		node := dir.Nodes[i]
 		if node.IsDirectory {
-			// directory get content folder
 			folder := filepath.Join(remotefolder, node.Name)
-			m4BackupFolder(remotefolder+"/"+node.Name, filepath.Join(localfolder, folder))
+			fmt.Fprintf(os.Stdout, "Found directory remote path %s local path %s\n", folder, filepath.Join(localfolder, node.Name))
+			// directory get content folder
+			m4BackupFolder(remotefolder+"/"+node.Name, filepath.Join(localfolder, node.Name))
 		} else {
 			// save file in localfolder
 			folder := dir.CurrentPath
 			filename := node.Name
 			fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
-			content, err := m4Browser.m4client.DownloadContent(folder + "/" + filename)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Error while getting file (%s/%s) error : %v\n", folder, filename, err)
-				continue
-			}
-			folderFilename := filepath.Join(localfolder, folder)
-			_, err = os.Stat(folderFilename)
-			// create folder and sub folder if not exists
-			if os.IsNotExist(err) {
-				if err = os.MkdirAll(folderFilename, os.ModePerm); err != nil {
-					fmt.Fprintf(os.Stderr, "Error while creating directory %s error %v \n", folderFilename, err)
-					continue
-				}
-			}
-			// copy file locally
-			if err = ioutil.WriteFile(filepath.Join(folderFilename, filename), content, os.ModePerm); err != nil {
-				fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", filename, err)
+			if !downloadM4File(localfolder, folder, filename) {
+				return
 			}
 			dowloadProgress.SetValue(int(i / items))
+			dowloadProgress.Show()
 		}
 	}
 }
@@ -113,7 +100,7 @@ func downloadFiles() {
 		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
 		isDirectory := string(tableUi.CellValue(tableFilesModel, i, 2).(ui.TableString))
 		if isDirectory == "folder" {
-			m4BackupFolder(folder+"/"+filename, rootpath)
+			m4BackupFolder(folder+"/"+filename, filepath.Join(filepath.Join(rootpath, folder), filename))
 		} else {
 			fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
 			nok := downloadM4File(rootpath, folder, filename)
@@ -122,6 +109,7 @@ func downloadFiles() {
 			}
 		}
 		dowloadProgress.SetValue(int(i / items))
+		dowloadProgress.Enable()
 	}
 	if onError {
 		ui.MsgBoxError(Mainwin, "Download Error !",
@@ -140,7 +128,10 @@ func downloadM4File(localpath, m4folder, m4filename string) bool {
 
 		return false
 	}
-	folderFilename := filepath.Join(localpath, m4folder)
+	//p := filepath.Dir(m4folder)
+	//parent := filepath.Base(p)
+	//folderFilename := filepath.Join(localpath, parent)
+	folderFilename := localpath
 	_, err = os.Stat(folderFilename)
 	// create folder and sub folder if not exists
 	if os.IsNotExist(err) {
@@ -150,6 +141,7 @@ func downloadM4File(localpath, m4folder, m4filename string) bool {
 		}
 	}
 	// copy file locally
+	fmt.Fprintf(os.Stdout, "Copy file folder: %s, filename: %s\n", folderFilename, m4filename)
 	if err = ioutil.WriteFile(filepath.Join(folderFilename, m4filename), content, os.ModePerm); err != nil {
 		fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", m4filename, err)
 		return false
@@ -184,6 +176,7 @@ func files() []string {
 		localFilepath := filepath.Join(folderFilename, filename)
 		filespaths = append(filespaths, localFilepath)
 		dowloadProgress.SetValue(int(i / items))
+		dowloadProgress.Enable()
 	}
 	return filespaths
 }
