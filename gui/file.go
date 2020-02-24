@@ -13,6 +13,7 @@ import (
 var (
 	tableUi            *modelFilesTable
 	tableFilesModel    *ui.TableModel
+	dowloadProgress    *ui.ProgressBar
 	insertingRow       = false
 	updatedByFileTable = false
 )
@@ -52,11 +53,13 @@ func m4BackupFolder(remotefolder, localfolder string) {
 			"Error while calling M4 "+m4Browser.m4client.IPClient+", error : "+err.Error())
 		return
 	}
-	for i := 0; i < len(dir.Nodes); i++ {
+	items := len(dir.Nodes)
+	for i := 0; i < items; i++ {
 		node := dir.Nodes[i]
 		if node.IsDirectory {
 			// directory get content folder
-			m4BackupFolder(remotefolder+"/"+node.Name, filepath.Join(localfolder, node.Name))
+			folder := filepath.Join(remotefolder, node.Name)
+			m4BackupFolder(remotefolder+"/"+node.Name, filepath.Join(localfolder, folder))
 		} else {
 			// save file in localfolder
 			folder := dir.CurrentPath
@@ -80,6 +83,7 @@ func m4BackupFolder(remotefolder, localfolder string) {
 			if err = ioutil.WriteFile(filepath.Join(folderFilename, filename), content, os.ModePerm); err != nil {
 				fmt.Fprintf(os.Stderr, "Error while creating file %s error %v \n", filename, err)
 			}
+			dowloadProgress.SetValue(int(i / items))
 		}
 	}
 }
@@ -103,7 +107,8 @@ func downloadFiles() {
 	}
 	onError := false
 	// download all selected files
-	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
+	items := tableUi.NumRows(tableFilesModel)
+	for i := 0; i < items; i++ {
 		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
 		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
 		isDirectory := string(tableUi.CellValue(tableFilesModel, i, 2).(ui.TableString))
@@ -116,6 +121,7 @@ func downloadFiles() {
 				onError = true
 			}
 		}
+		dowloadProgress.SetValue(int(i / items))
 	}
 	if onError {
 		ui.MsgBoxError(Mainwin, "Download Error !",
@@ -169,13 +175,15 @@ func files() []string {
 			err.Error())
 		return filespaths
 	}
+	items := tableUi.NumRows(tableFilesModel)
 	// download all selected files
-	for i := 0; i < tableUi.NumRows(tableFilesModel); i++ {
+	for i := 0; i < items; i++ {
 		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
 		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
 		folderFilename := filepath.Join(rootpath, folder)
 		localFilepath := filepath.Join(folderFilename, filename)
 		filespaths = append(filespaths, localFilepath)
+		dowloadProgress.SetValue(int(i / items))
 	}
 	return filespaths
 }
@@ -222,6 +230,9 @@ func MakeFilesTable() ui.Control {
 	table.AppendTextColumn("Filename", 1, ui.TableModelColumnNeverEditable, nil)
 	table.AppendTextColumn("Folder", 2, ui.TableModelColumnNeverEditable, nil)
 	table.AppendButtonColumn("remove", 3, ui.TableModelColumnAlwaysEditable)
+	dowloadProgress = ui.NewProgressBar()
+	vbox.Append(dowloadProgress, false)
+
 	return vbox
 }
 
