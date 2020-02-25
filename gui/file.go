@@ -16,23 +16,25 @@ var (
 	dowloadProgress    *ui.ProgressBar
 	insertingRow       = false
 	updatedByFileTable = false
+	onError            = false
+	finished           = make(chan bool, 1)
 )
 
-// export files to local harddrive
-func exportFiles(b *ui.Button) {
-	b.Disable()
-	dowloadProgress.Show()
-	downloadFiles()
-	b.Enable()
-}
-
-func updateProgressBar(i int) {
+func checkProgress(current, total int) {
 	ui.QueueMain(func() {
-		dowloadProgress.SetValue(i)
+		value := int(float64(current) / float64(total) * 100.0)
+		dowloadProgress.SetValue(value)
 	})
 }
 
+// export files to local harddrive
+func exportFiles(b *ui.Button) {
+	dowloadProgress.Show()
+	downloadFiles(b)
+}
+
 func completeM4Backup(b *ui.Button) {
+	b.Disable()
 	path, err := os.Getwd()
 	if err != nil {
 		ui.MsgBoxError(Mainwin, "Error in folder",
@@ -45,6 +47,7 @@ func completeM4Backup(b *ui.Button) {
 	fmt.Fprintf(os.Stdout, "Creating folder %s\n", folderName)
 	rootpath := filepath.Join(path, folderName)
 	m4BackupFolder("/", rootpath)
+	b.Enable()
 }
 
 func m4BackupFolder(remotefolder, localfolder string) {
@@ -78,18 +81,34 @@ func m4BackupFolder(remotefolder, localfolder string) {
 			if !downloadM4File(localfolder, folder, filename) {
 				return
 			}
-
-			percent := (float64(i) / float64(items) * 100.)
-			go func() {
-				ui.QueueMain(func() {
-					dowloadProgress.SetValue(int(percent))
-				})
-			}()
+			checkProgress(i, items)
 		}
 	}
 }
 
-func downloadFiles() {
+func saveFiles(rootpath string) {
+	// download all selected files
+	items := tableUi.NumRows(tableFilesModel)
+	for i := 0; i < items; i++ {
+		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
+		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
+		isDirectory := string(tableUi.CellValue(tableFilesModel, i, 2).(ui.TableString))
+		if isDirectory == "folder" {
+			m4BackupFolder(folder+"/"+filename, filepath.Join(filepath.Join(rootpath, folder), filename))
+		} else {
+			fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
+			nok := downloadM4File(rootpath, folder, filename)
+			if !nok {
+				onError = true
+			}
+			checkProgress(i, items)
+		}
+	}
+	finished <- true
+}
+
+func downloadFiles(b *ui.Button) {
+	b.Disable()
 	path, err := os.Getwd()
 	if err != nil {
 		ui.MsgBoxError(Mainwin, "Error in folder",
@@ -106,28 +125,11 @@ func downloadFiles() {
 			err.Error())
 		return
 	}
-	onError := false
-	// download all selected files
-	items := tableUi.NumRows(tableFilesModel)
-	for i := 0; i < items; i++ {
-		folder := string(tableUi.CellValue(tableFilesModel, i, 0).(ui.TableString))
-		filename := string(tableUi.CellValue(tableFilesModel, i, 1).(ui.TableString))
-		isDirectory := string(tableUi.CellValue(tableFilesModel, i, 2).(ui.TableString))
-		if isDirectory == "folder" {
-			m4BackupFolder(folder+"/"+filename, filepath.Join(filepath.Join(rootpath, folder), filename))
-		} else {
-			fmt.Fprintf(os.Stdout, "folder %s file %s will be donwloaded.\n", folder, filename)
-			nok := downloadM4File(rootpath, folder, filename)
-			if !nok {
-				onError = true
-			}
-			ui.QueueMain(func() {
-				percent := (float64(i) / float64(items) * 100.)
-				dowloadProgress.SetValue(int(percent))
-			})
+	onError = false
 
-		}
-	}
+	go saveFiles(rootpath)
+
+	
 	if onError {
 		ui.MsgBoxError(Mainwin, "Download Error !",
 			"Errors occur when downloading files, check log to know why.")
@@ -135,6 +137,9 @@ func downloadFiles() {
 		ui.MsgBox(Mainwin, "Download ended.",
 			"Complete download and can be found here "+rootpath)
 	}
+	b.Enable()
+	return
+
 }
 
 func downloadM4File(localpath, m4folder, m4filename string) bool {
@@ -192,19 +197,16 @@ func files() []string {
 		folderFilename := filepath.Join(rootpath, folder)
 		localFilepath := filepath.Join(folderFilename, filename)
 		filespaths = append(filespaths, localFilepath)
-		percent := int(i / items * 100)
-		dowloadProgress.SetValue(percent)
 	}
 	return filespaths
 }
 
 func sendFilesByMail(b *ui.Button) {
-	b.Disable()
+
 	dowloadProgress.Show()
-	downloadFiles()
+	downloadFiles(b)
 	filespaths := files()
 	Sendmail(filespaths)
-	b.Enable()
 }
 
 func MakeFilesTable() ui.Control {
