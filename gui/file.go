@@ -69,8 +69,8 @@ func m4BackupFolder(remotefolder, localfolder string) {
 			if !downloadM4File(localfolder, folder, filename) {
 				return
 			}
-			dowloadProgress.SetValue(int(i / items))
-			dowloadProgress.Show()
+			percent := (float64(i) / float64(items) * 100.)
+			dowloadProgress.SetValue(int(percent))
 		}
 	}
 }
@@ -107,9 +107,11 @@ func downloadFiles() {
 			if !nok {
 				onError = true
 			}
+
+			percent := (float64(i) / float64(items) * 100.)
+			dowloadProgress.SetValue(int(percent))
 		}
-		dowloadProgress.SetValue(int(i / items))
-		dowloadProgress.Enable()
+
 	}
 	if onError {
 		ui.MsgBoxError(Mainwin, "Download Error !",
@@ -175,8 +177,8 @@ func files() []string {
 		folderFilename := filepath.Join(rootpath, folder)
 		localFilepath := filepath.Join(folderFilename, filename)
 		filespaths = append(filespaths, localFilepath)
-		dowloadProgress.SetValue(int(i / items))
-		dowloadProgress.Enable()
+		percent := int(i / items * 100)
+		dowloadProgress.SetValue(percent)
 	}
 	return filespaths
 }
