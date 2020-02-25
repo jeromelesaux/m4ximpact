@@ -20,7 +20,16 @@ var (
 
 // export files to local harddrive
 func exportFiles(b *ui.Button) {
+	b.Disable()
+	dowloadProgress.Show()
 	downloadFiles()
+	b.Enable()
+}
+
+func updateProgressBar(i int) {
+	ui.QueueMain(func() {
+		dowloadProgress.SetValue(i)
+	})
 }
 
 func completeM4Backup(b *ui.Button) {
@@ -69,8 +78,13 @@ func m4BackupFolder(remotefolder, localfolder string) {
 			if !downloadM4File(localfolder, folder, filename) {
 				return
 			}
+
 			percent := (float64(i) / float64(items) * 100.)
-			dowloadProgress.SetValue(int(percent))
+			go func() {
+				ui.QueueMain(func() {
+					dowloadProgress.SetValue(int(percent))
+				})
+			}()
 		}
 	}
 }
@@ -107,11 +121,12 @@ func downloadFiles() {
 			if !nok {
 				onError = true
 			}
+			ui.QueueMain(func() {
+				percent := (float64(i) / float64(items) * 100.)
+				dowloadProgress.SetValue(int(percent))
+			})
 
-			percent := (float64(i) / float64(items) * 100.)
-			dowloadProgress.SetValue(int(percent))
 		}
-
 	}
 	if onError {
 		ui.MsgBoxError(Mainwin, "Download Error !",
@@ -184,9 +199,12 @@ func files() []string {
 }
 
 func sendFilesByMail(b *ui.Button) {
+	b.Disable()
+	dowloadProgress.Show()
 	downloadFiles()
 	filespaths := files()
 	Sendmail(filespaths)
+	b.Enable()
 }
 
 func MakeFilesTable() ui.Control {
