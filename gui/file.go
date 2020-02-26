@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/andlabs/ui"
+	m "github.com/jeromelesaux/m4ximpact/common"
 )
 
 var (
@@ -28,13 +29,13 @@ func checkProgress(current, total int) {
 }
 
 // export files to local harddrive
-func exportFiles(b *ui.Button) {
+func exportFilesAction(b *ui.Button) {
 	dowloadProgress.Show()
-	downloadFiles(b)
+	downloadFilesAction(b)
 }
 
-func completeM4Backup(b *ui.Button) {
-	b.Disable()
+func completeM4BackupAction(b *ui.Button) {
+
 	path, err := os.Getwd()
 	if err != nil {
 		ui.MsgBoxError(Mainwin, "Error in folder",
@@ -46,23 +47,37 @@ func completeM4Backup(b *ui.Button) {
 	folderName := t.Format("2006-01-02")
 	fmt.Fprintf(os.Stdout, "Creating folder %s\n", folderName)
 	rootpath := filepath.Join(path, folderName)
-	m4BackupFolder("/", rootpath)
-	b.Enable()
+	m.MakeMainThread()
+
+	go func() {
+		m4BackupFolder("/", rootpath)
+		m.CloseMainThread()
+	}()
+	if m.Mainfunc != nil {
+		for f := range m.Mainfunc {
+			f()
+		}
+	}
+	return
 }
 
 func m4BackupFolder(remotefolder, localfolder string) {
 	// create local folder
 	if err := os.MkdirAll(localfolder, os.ModePerm); err != nil {
-		ui.MsgBoxError(Mainwin, "Error in folder creation",
-			err.Error())
+		m.Do(func() {
+			ui.MsgBoxError(Mainwin, "Error in folder creation",
+				err.Error())
+		})
 		return
 	}
 	// call remote m4 to get the remotefolder content
 	err, dir := m4Browser.m4client.GetDir(remotefolder)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while calling m4 (%s) error : %v\n", m4Browser.m4client.IPClient, err)
-		ui.MsgBoxError(Mainwin, "Error while calling M4",
-			"Error while calling M4 "+m4Browser.m4client.IPClient+", error : "+err.Error())
+		m.Do(func() {
+			ui.MsgBoxError(Mainwin, "Error while calling M4",
+				"Error while calling M4 "+m4Browser.m4client.IPClient+", error : "+err.Error())
+		})
 		return
 	}
 	items := len(dir.Nodes)
@@ -86,7 +101,7 @@ func m4BackupFolder(remotefolder, localfolder string) {
 	}
 }
 
-func saveFiles(rootpath string) {
+func saveFiles(rootpath string, b *ui.Button) {
 	// download all selected files
 	items := tableUi.NumRows(tableFilesModel)
 	for i := 0; i < items; i++ {
@@ -104,11 +119,20 @@ func saveFiles(rootpath string) {
 			checkProgress(i, items)
 		}
 	}
-	finished <- true
+
+	m.Do(func() {
+		if onError {
+			ui.MsgBoxError(Mainwin, "Download Error !",
+				"Errors occur when downloading files, check log to know why.")
+		} else {
+			ui.MsgBox(Mainwin, "Download ended.",
+				"Complete download and can be found here "+rootpath)
+		}
+		m.CloseMainThread()
+	})
 }
 
-func downloadFiles(b *ui.Button) {
-	b.Disable()
+func downloadFilesAction(b *ui.Button) {
 	path, err := os.Getwd()
 	if err != nil {
 		ui.MsgBoxError(Mainwin, "Error in folder",
@@ -126,18 +150,13 @@ func downloadFiles(b *ui.Button) {
 		return
 	}
 	onError = false
-
-	go saveFiles(rootpath)
-
-	
-	if onError {
-		ui.MsgBoxError(Mainwin, "Download Error !",
-			"Errors occur when downloading files, check log to know why.")
-	} else {
-		ui.MsgBox(Mainwin, "Download ended.",
-			"Complete download and can be found here "+rootpath)
+	m.MakeMainThread()
+	go saveFiles(rootpath, b)
+	if m.Mainfunc != nil {
+		for f := range m.Mainfunc {
+			f()
+		}
 	}
-	b.Enable()
 	return
 
 }
@@ -201,11 +220,11 @@ func files() []string {
 	return filespaths
 }
 
-func sendFilesByMail(b *ui.Button) {
-
+func sendFilesByMailAction(b *ui.Button) {
 	dowloadProgress.Show()
-	downloadFiles(b)
-	filespaths := files()
+	var filespaths []string
+	downloadFilesAction(b)
+	filespaths = files()
 	Sendmail(filespaths)
 }
 
@@ -216,17 +235,17 @@ func MakeFilesTable() ui.Control {
 	vbox.SetPadded(true)
 
 	backupAll := ui.NewButton("Backup all your M4 content")
-	backupAll.OnClicked(completeM4Backup)
+	backupAll.OnClicked(completeM4BackupAction)
 	vbox.Append(backupAll, false)
 	grid := ui.NewGrid()
 	grid.SetPadded(true)
 	vbox.Append(grid, false)
 
 	export := ui.NewButton("Save")
-	export.OnClicked(exportFiles)
+	export.OnClicked(exportFilesAction)
 	//vbox.Append(currentDirectory, false)
 	sendByMail := ui.NewButton("Send by Mail")
-	sendByMail.OnClicked(sendFilesByMail)
+	sendByMail.OnClicked(sendFilesByMailAction)
 	//	hbox.Append(browse, false)
 	grid.Append(export,
 		0, 1, 1, 1,

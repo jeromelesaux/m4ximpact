@@ -9,9 +9,7 @@ import (
 var version = "0.1rc"
 
 func main() {
-
 	ui.Main(setupUI)
-
 }
 
 func setupUI() {
