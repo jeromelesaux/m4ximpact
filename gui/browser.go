@@ -216,7 +216,7 @@ func makeDefaultBrowser() *modelBrowser {
 }
 
 func makeSampleBrowser() *modelBrowser {
-	m := newModelBrowser()
+	m := makeDefaultBrowser()
 	m.m4Dir.CurrentPath = "/home/home/documents"
 	for i := 0; i < 5; i++ {
 		m.m4Dir.Nodes = append(m.m4Dir.Nodes, m4.M4Node{Name: "fichier" + strconv.Itoa(i), Size: "10 ko", IsDirectory: false})
@@ -242,6 +242,7 @@ func updateSampleBrowser(m *modelBrowser) {
 func MakeM4DiskBrowser() ui.Control {
 
 	m4Browser = makeDefaultBrowser()
+	//m4Browser = makeSampleBrowser()
 
 	m4Browser.m4client.IPClient = config.M4Url
 

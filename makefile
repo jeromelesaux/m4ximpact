@@ -29,3 +29,8 @@ build:
 	@echo "Compilation for macos"
 	GOOS=darwin go build ${LDFLAGS} -o m4backup $(SOURCEDIR)/main.go
 	zip m4backup-$(appversion)-macos.zip m4backup 
+
+
+clean:
+	rm -f *.zip
+	rm -f m4backup*
