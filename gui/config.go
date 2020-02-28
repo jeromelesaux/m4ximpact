@@ -8,7 +8,9 @@ import (
 )
 
 var (
-	config = common.NewConfig()
+	config      = common.NewConfig()
+	m4urlEntry  *ui.Entry
+	mailerEntry *ui.Entry
 )
 
 func MakeConfigurationPage() ui.Control {
@@ -29,26 +31,29 @@ func MakeConfigurationPage() ui.Control {
 	confForm.SetPadded(true)
 	m4configuration.SetChild(confForm)
 
-	m4urlEntry := ui.NewEntry()
+	m4urlEntry = ui.NewEntry()
 	m4urlEntry.SetReadOnly(false)
 	m4urlEntry.SetText(config.M4Url)
 	confForm.Append("M4 Address", m4urlEntry, false)
 
-	mailerEntry := ui.NewEntry()
+	mailerEntry = ui.NewEntry()
 	mailerEntry.SetReadOnly(false)
 	mailerEntry.SetText(config.MailerApp)
 	confForm.Append("Mail application", mailerEntry, false)
 
 	// m4 button to set url
 	saveConfigButton := ui.NewButton(".Save Configuration.")
-	saveConfigButton.OnClicked(func(*ui.Button) {
-		config.M4Url = m4urlEntry.Text()
-		m4Browser.m4client.IPClient = config.M4Url
-		config.MailerApp = mailerEntry.Text()
-		config.Save()
-		fmt.Println("Set m4 url : " + config.M4Url + " , and MailerApp : " + config.MailerApp)
-	})
+	saveConfigButton.OnClicked(saveConfiguration)
 	confForm.Append("Set", saveConfigButton, false)
 
 	return vbox
+}
+
+func saveConfiguration(b *ui.Button) {
+	config.M4Url = m4urlEntry.Text()
+	m4Browser.m4client.IPClient = config.M4Url
+	config.MailerApp = mailerEntry.Text()
+	m4urlEntry2.SetText(config.M4Url)
+	config.Save()
+	fmt.Println("Set m4 url : " + config.M4Url + " , and MailerApp : " + config.MailerApp)
 }

@@ -15,6 +15,7 @@ var (
 	tableUi            *modelFilesTable
 	tableFilesModel    *ui.TableModel
 	dowloadProgress    *ui.ProgressBar
+	m4urlEntry2        *ui.Entry
 	insertingRow       = false
 	updatedByFileTable = false
 	onError            = false
@@ -246,6 +247,7 @@ func MakeFilesTable() ui.Control {
 	//vbox.Append(currentDirectory, false)
 	sendByMail := ui.NewButton("Send by Mail")
 	sendByMail.OnClicked(sendFilesByMailAction)
+
 	//	hbox.Append(browse, false)
 	grid.Append(export,
 		0, 1, 1, 1,
@@ -254,6 +256,24 @@ func MakeFilesTable() ui.Control {
 		1, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
 
+	grid2 := ui.NewGrid()
+	grid2.SetPadded(true)
+	vbox.Append(grid2, false)
+	urlLabel := ui.NewEntry()
+	urlLabel.SetReadOnly(true)
+	urlLabel.SetText("M4 url")
+	m4urlEntry2 = ui.NewEntry()
+	m4urlEntry2.SetReadOnly(false)
+	m4urlEntry2.SetText(config.M4Url)
+	saveM4ip := ui.NewButton("Save Ip")
+	saveM4ip.OnClicked(saveConfiguration)
+	grid2.Append(urlLabel,
+		0, 1, 1, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
+	grid2.Append(m4urlEntry2, 1, 1, 1, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
+	grid2.Append(saveM4ip, 0, 2, 2, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
 	tableFilesModel = ui.NewTableModel(tableUi)
 	table := ui.NewTable(&ui.TableParams{
 		Model:                         tableFilesModel,
