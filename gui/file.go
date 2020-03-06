@@ -173,7 +173,7 @@ func downloadM4File(localpath, m4folder, m4filename string) bool {
 	//p := filepath.Dir(m4folder)
 	//parent := filepath.Base(p)
 	//folderFilename := filepath.Join(localpath, parent)
-	folderFilename := localpath
+	folderFilename := filepath.Join(localpath, m4folder)
 	_, err = os.Stat(folderFilename)
 	// create folder and sub folder if not exists
 	if os.IsNotExist(err) {

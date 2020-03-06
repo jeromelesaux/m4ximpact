@@ -71,10 +71,10 @@ func Sendmail(attachedFiles []string) error {
 
 func CreateEml(attachedFiles []string) (string, error) {
 	e := eml.NewEml()
-	e.From = "change@me.net"
-	e.To = "change@me.net"
-	e.XSender = "change@me.net"
-	e.XReceiver = "change@me.net"
+	e.From = ""
+	e.To = ""
+	e.XSender = ""
+	e.XReceiver = ""
 	for _, v := range attachedFiles {
 		e.AddAttachment(v)
 	}
