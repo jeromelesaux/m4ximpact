@@ -43,12 +43,12 @@ func sendmail_cmd() []string {
 	return []string{""}
 }
 
-func Sendmail(attachedFiles []string) error {
+func Sendmail(attachedFiles []string, from, to string) error {
 	cmds := sendmail_cmd()
 	arguments := make([]string, 0)
 	arguments = append(arguments, cmds[1:]...)
 	if runtime.GOOS == "windows" {
-		mailFilepath, err := CreateEml(attachedFiles)
+		mailFilepath, err := CreateEml(attachedFiles, from, to)
 		if err != nil {
 			return err
 		}
@@ -69,12 +69,12 @@ func Sendmail(attachedFiles []string) error {
 	return nil
 }
 
-func CreateEml(attachedFiles []string) (string, error) {
+func CreateEml(attachedFiles []string, from, to string) (string, error) {
 	e := eml.NewEml()
-	e.From = ""
-	e.To = ""
-	e.XSender = ""
-	e.XReceiver = ""
+	e.From = from
+	e.To = to
+	e.XSender = from
+	e.XReceiver = to
 	for _, v := range attachedFiles {
 		e.AddAttachment(v)
 	}

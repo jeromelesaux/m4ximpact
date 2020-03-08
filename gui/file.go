@@ -16,6 +16,7 @@ var (
 	tableFilesModel    *ui.TableModel
 	dowloadProgress    *ui.ProgressBar
 	m4urlEntry2        *ui.Entry
+	sendTo             *ui.Entry
 	insertingRow       = false
 	updatedByFileTable = false
 	onError            = false
@@ -226,7 +227,7 @@ func sendFilesByMailAction(b *ui.Button) {
 	var filespaths []string
 	downloadFilesAction(b)
 	filespaths = files()
-	Sendmail(filespaths)
+	Sendmail(filespaths, mailFrom.Text(), sendTo.Text())
 }
 
 func MakeFilesTable() ui.Control {
@@ -245,15 +246,25 @@ func MakeFilesTable() ui.Control {
 	export := ui.NewButton("Save")
 	export.OnClicked(exportFilesAction)
 	//vbox.Append(currentDirectory, false)
+
+	gridMail := ui.NewGrid()
+	gridMail.SetPadded(true)
+	vbox.Append(gridMail, false)
+
 	sendByMail := ui.NewButton("Send by Mail")
 	sendByMail.OnClicked(sendFilesByMailAction)
+	sendTo = ui.NewEntry()
+	sendTo.SetReadOnly(false)
 
 	//	hbox.Append(browse, false)
 	grid.Append(export,
 		0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
-	grid.Append(sendByMail,
+	gridMail.Append(sendByMail,
 		1, 1, 1, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
+	gridMail.Append(sendTo,
+		0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
 
 	grid2 := ui.NewGrid()
@@ -267,6 +278,7 @@ func MakeFilesTable() ui.Control {
 	m4urlEntry2.SetText(config.M4Url)
 	saveM4ip := ui.NewButton("Save Ip")
 	saveM4ip.OnClicked(saveConfiguration)
+
 	grid2.Append(urlLabel,
 		0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)

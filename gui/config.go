@@ -11,6 +11,7 @@ var (
 	config      = common.NewConfig()
 	m4urlEntry  *ui.Entry
 	mailerEntry *ui.Entry
+	mailFrom    *ui.Entry
 )
 
 func MakeConfigurationPage() ui.Control {
@@ -41,6 +42,10 @@ func MakeConfigurationPage() ui.Control {
 	mailerEntry.SetText(config.MailerApp)
 	confForm.Append("Mail application", mailerEntry, false)
 
+	mailFrom = ui.NewEntry()
+	mailFrom.SetReadOnly(false)
+	mailFrom.SetText(config.MailFrom)
+	confForm.Append("Your mail:", mailFrom, false)
 	// m4 button to set url
 	saveConfigButton := ui.NewButton(".Save Configuration.")
 	saveConfigButton.OnClicked(saveConfiguration)
@@ -53,7 +58,8 @@ func saveConfiguration(b *ui.Button) {
 	config.M4Url = m4urlEntry.Text()
 	m4Browser.m4client.IPClient = config.M4Url
 	config.MailerApp = mailerEntry.Text()
+	config.MailFrom = mailFrom.Text()
 	m4urlEntry2.SetText(config.M4Url)
 	config.Save()
-	fmt.Println("Set m4 url : " + config.M4Url + " , and MailerApp : " + config.MailerApp)
+	fmt.Println("Set m4 url : " + config.M4Url + " , and MailerApp : " + config.MailerApp + " , and your mail :" + config.MailFrom)
 }

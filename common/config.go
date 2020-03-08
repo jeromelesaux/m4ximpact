@@ -12,6 +12,7 @@ var defaultConfig = &Config{M4Url: "cpc"}
 type Config struct {
 	M4Url     string
 	MailerApp string
+	MailFrom  string
 }
 
 func NewConfig() *Config {
