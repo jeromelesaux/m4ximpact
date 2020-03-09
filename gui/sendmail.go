@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -75,6 +76,9 @@ func CreateEml(attachedFiles []string, from, to string) (string, error) {
 	e.To = to
 	e.XSender = from
 	e.XReceiver = to
+	e.Date = time.Now().Format(time.RFC822)
+	e.Subject = "send from my m4"
+	e.Body = []byte("<html><body>send from my m4</body></html>")
 	for _, v := range attachedFiles {
 		e.AddAttachment(v)
 	}
