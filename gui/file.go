@@ -239,27 +239,33 @@ func MakeFilesTable() ui.Control {
 	backupAll := ui.NewButton("Backup all your M4 content")
 	backupAll.OnClicked(completeM4BackupAction)
 	vbox.Append(backupAll, false)
-	grid := ui.NewGrid()
-	grid.SetPadded(true)
-	vbox.Append(grid, false)
 
+	upperGrid := ui.NewGrid()
+	upperGrid.SetPadded(true)
+	vbox.Append(upperGrid, false)
+
+	exportGrid := ui.NewGrid()
+	exportGrid.SetPadded(true)
+	//vbox.Append(grid, false)
 	export := ui.NewButton("Save")
 	export.OnClicked(exportFilesAction)
-	//vbox.Append(currentDirectory, false)
-
-	gridMail := ui.NewGrid()
-	gridMail.SetPadded(true)
-	vbox.Append(gridMail, false)
-
-	sendByMail := ui.NewButton("Send by Mail")
-	sendByMail.OnClicked(sendFilesByMailAction)
-	sendTo = ui.NewEntry()
-	sendTo.SetReadOnly(false)
-
-	//	hbox.Append(browse, false)
-	grid.Append(export,
+	exportGrid.Append(export,
 		0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
+	mailLabel := ui.NewEntry()
+	mailLabel.SetReadOnly(true)
+	mailLabel.SetText("Email.")
+	exportGrid.Append(mailLabel, 1, 1, 1, 1,
+		false, ui.AlignFill, true, ui.AlignFill)
+
+	// send by mail block
+	gridMail := ui.NewGrid()
+	gridMail.SetPadded(true)
+	//vbox.Append(gridMail, false)
+	sendTo = ui.NewEntry()
+	sendTo.SetReadOnly(false)
+	sendByMail := ui.NewButton("Send by Mail")
+	sendByMail.OnClicked(sendFilesByMailAction)
 	gridMail.Append(sendByMail,
 		1, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
@@ -267,25 +273,44 @@ func MakeFilesTable() ui.Control {
 		0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
 
+	upperGrid.Append(exportGrid, 0, 1, 1, 1,
+		false, ui.AlignFill, true, ui.AlignFill)
+	upperGrid.Append(gridMail, 1, 1, 1, 1,
+		false, ui.AlignFill, true, ui.AlignFill)
+
+	lowerGrid := ui.NewGrid()
+	lowerGrid.SetPadded(false)
+	vbox.Append(lowerGrid, false)
+
 	grid2 := ui.NewGrid()
 	grid2.SetPadded(true)
-	vbox.Append(grid2, false)
+	//vbox.Append(grid2, false)
+
 	urlLabel := ui.NewEntry()
 	urlLabel.SetReadOnly(true)
-	urlLabel.SetText("M4 url")
+	urlLabel.SetText(".M4 URL.")
+
 	m4urlEntry2 = ui.NewEntry()
 	m4urlEntry2.SetReadOnly(false)
 	m4urlEntry2.SetText(config.M4Url)
 	saveM4ip := ui.NewButton("Save Ip")
 	saveM4ip.OnClicked(saveConfiguration)
 
-	grid2.Append(urlLabel,
+	/*	grid2.Append(urlLabel,
 		0, 1, 1, 1,
-		false, ui.AlignFill, false, ui.AlignFill)
+		false, ui.AlignFill, false, ui.AlignFill) */
+
 	grid2.Append(m4urlEntry2, 1, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
-	grid2.Append(saveM4ip, 0, 2, 2, 1,
+	grid2.Append(saveM4ip, 0, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
+
+	lowerGrid.Append(urlLabel, 0, 1, 1, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
+
+	lowerGrid.Append(grid2, 1, 1, 1, 1,
+		false, ui.AlignFill, false, ui.AlignFill)
+
 	tableFilesModel = ui.NewTableModel(tableUi)
 	table := ui.NewTable(&ui.TableParams{
 		Model:                         tableFilesModel,
