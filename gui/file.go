@@ -296,10 +296,6 @@ func MakeFilesTable() ui.Control {
 	saveM4ip := ui.NewButton("Save Ip")
 	saveM4ip.OnClicked(saveConfiguration)
 
-	/*	grid2.Append(urlLabel,
-		0, 1, 1, 1,
-		false, ui.AlignFill, false, ui.AlignFill) */
-
 	grid2.Append(m4urlEntry2, 1, 1, 1, 1,
 		false, ui.AlignFill, false, ui.AlignFill)
 	grid2.Append(saveM4ip, 0, 1, 1, 1,
