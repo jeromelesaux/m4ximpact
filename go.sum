@@ -1,0 +1,8 @@
+github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e h1:wSQCJiig/QkoUnpvelSPbLiZNWvh2yMqQTQvIQqSUkU=
+github.com/andlabs/ui v0.0.0-20200610043537-70a69d6ae31e/go.mod h1:5G2EjwzgZUPnnReoKvPWVneT8APYbyKkihDVAHUi0II=
+github.com/google/uuid v1.2.0 h1:qJYtXnJRWmpe7m/3XlyhrsLrEURqHRM2kxzoxXqyUDs=
+github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/jeromelesaux/eml v0.0.0-20200302154014-7f9c7904fcd9 h1:S57q1rPf7lnICWBySphtN40WmQxlj6lKGfv7NQgifQs=
+github.com/jeromelesaux/eml v0.0.0-20200302154014-7f9c7904fcd9/go.mod h1:vYP5l7FGxbdU/D3Di0P77rlIBx59qo6HoW3lsmPXwW0=
+github.com/jeromelesaux/m4client v0.0.0-20210531105736-66015db694c6 h1:FblhUNZgk/Dqk9PnKLASJb4LSbhY4BgfFxUx9kMrpSI=
+github.com/jeromelesaux/m4client v0.0.0-20210531105736-66015db694c6/go.mod h1:XAc4QwBunt2KZlHLBYhwM8PMbelnEBKGceVaINsx31s=
