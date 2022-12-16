@@ -60,7 +60,6 @@ func completeM4BackupAction(b *ui.Button) {
 			f()
 		}
 	}
-	return
 }
 
 func m4BackupFolder(remotefolder, localfolder string) {
@@ -159,8 +158,6 @@ func downloadFilesAction(b *ui.Button) {
 			f()
 		}
 	}
-	return
-
 }
 
 func downloadM4File(localpath, m4folder, m4filename string) bool {
@@ -227,7 +224,10 @@ func sendFilesByMailAction(b *ui.Button) {
 	var filespaths []string
 	downloadFilesAction(b)
 	filespaths = files()
-	Sendmail(filespaths, mailFrom.Text(), sendTo.Text())
+	err := Sendmail(filespaths, mailFrom.Text(), sendTo.Text())
+	if err != nil {
+		fmt.Printf("error while sending mail %v\n", err)
+	}
 }
 
 func MakeFilesTable() ui.Control {

@@ -9,7 +9,10 @@ import (
 var version = "0.1rc"
 
 func main() {
-	ui.Main(setupUI)
+	err := ui.Main(setupUI)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func setupUI() {

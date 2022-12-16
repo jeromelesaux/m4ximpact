@@ -152,7 +152,7 @@ func unselectFile(directory, name string) {
 			}
 		}
 	}
-	if found == false {
+	if !found {
 		unselectFileInFilesUi(directory, name)
 	}
 }

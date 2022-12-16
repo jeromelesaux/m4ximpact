@@ -80,7 +80,10 @@ func CreateEml(attachedFiles []string, from, to string) (string, error) {
 	e.Subject = "send from my m4"
 	e.Body = []byte("<html><body>send from my m4</body></html>")
 	for _, v := range attachedFiles {
-		e.AddAttachment(v)
+		err := e.AddAttachment(v)
+		if err != nil {
+			fmt.Printf("error while add attachment %v\n", err)
+		}
 	}
 	path, err := os.Getwd()
 	if err != nil {

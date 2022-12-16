@@ -60,6 +60,9 @@ func saveConfiguration(b *ui.Button) {
 	config.MailerApp = mailerEntry.Text()
 	config.MailFrom = mailFrom.Text()
 	m4urlEntry2.SetText(config.M4Url)
-	config.Save()
+	err := config.Save()
+	if err != nil {
+		fmt.Printf("error while saving %v\n", err)
+	}
 	fmt.Println("Set m4 url : " + config.M4Url + " , and MailerApp : " + config.MailerApp + " , and your mail :" + config.MailFrom)
 }
