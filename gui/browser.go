@@ -192,7 +192,7 @@ func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableVal
 
 // call m4 card and update browser ui
 func callM4AndUpdateBrowser(m *modelBrowser) {
-	err, dir := m.m4client.GetDir(m.m4Dir.CurrentPath)
+	dir, err := m.m4client.GetDir(m.m4Dir.CurrentPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while calling m4 (%s) error : %v\n", m.m4client.IPClient, err)
 		ui.MsgBoxError(Mainwin, "Error while calling M4",
@@ -215,7 +215,7 @@ func makeDefaultBrowser() *modelBrowser {
 	return m
 }
 
-func makeSampleBrowser() *modelBrowser {
+func makeSampleBrowser() *modelBrowser { // nolint:staticcheck
 	m := makeDefaultBrowser()
 	m.m4Dir.CurrentPath = "/home/home/documents"
 	for i := 0; i < 5; i++ {
@@ -227,7 +227,7 @@ func makeSampleBrowser() *modelBrowser {
 	return m
 }
 
-func updateSampleBrowser(m *modelBrowser) {
+func updateSampleBrowser(m *modelBrowser) { // nolint:staticcheck
 	m.m4Dir.CurrentPath = "/home/home/documents/repertoire"
 	m.m4Dir.Nodes = m.m4Dir.Nodes[:0]
 	for i := 0; i < 15; i++ {
@@ -313,7 +313,7 @@ func addFile(i int, m *modelBrowser) {
 	}
 }
 
-func removeFileWithData(directory, name string) {
+func removeFileWithData(directory, name string) { // nolint:staticcheck
 	indexToRemove := -1
 	for index, v := range selectedFiles {
 		if v.Name == name && directory == v.Directory {

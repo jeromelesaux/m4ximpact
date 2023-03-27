@@ -20,7 +20,7 @@ var (
 	insertingRow       = false
 	updatedByFileTable = false
 	onError            = false
-	finished           = make(chan bool, 1)
+	finished           = make(chan bool, 1) // nolint:staticcheck
 )
 
 func checkProgress(current, total int) {
@@ -72,7 +72,7 @@ func m4BackupFolder(remotefolder, localfolder string) {
 		return
 	}
 	// call remote m4 to get the remotefolder content
-	err, dir := m4Browser.m4client.GetDir(remotefolder)
+	dir, err := m4Browser.m4client.GetDir(remotefolder)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error while calling m4 (%s) error : %v\n", m4Browser.m4client.IPClient, err)
 		m.Do(func() {
