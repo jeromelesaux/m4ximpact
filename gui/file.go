@@ -20,7 +20,8 @@ var (
 	insertingRow       = false
 	updatedByFileTable = false
 	onError            = false
-	finished           = make(chan bool, 1) // nolint:staticcheck
+	// nolint: unused, deadcode
+	finished = make(chan bool, 1)
 )
 
 func checkProgress(current, total int) {
@@ -230,6 +231,7 @@ func sendFilesByMailAction(b *ui.Button) {
 	}
 }
 
+// nolint:funlen, ireturn
 func MakeFilesTable() ui.Control {
 
 	tableUi = makeFilesTableUi()
@@ -346,6 +348,7 @@ func (mb *modelFilesTable) NumRows(m *ui.TableModel) int {
 	return len(selectedFiles)
 }
 
+// nolint: ireturn
 func (mb *modelFilesTable) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	switch column {
 	case 0:

@@ -157,6 +157,7 @@ func unselectFile(directory, name string) {
 	}
 }
 
+// nolint: ireturn
 func (mb *modelBrowser) CellValue(m *ui.TableModel, row, column int) ui.TableValue {
 	switch column {
 	case 0:
@@ -215,7 +216,8 @@ func makeDefaultBrowser() *modelBrowser {
 	return m
 }
 
-func makeSampleBrowser() *modelBrowser { // nolint:staticcheck
+// nolint: unused, deadcode
+func makeSampleBrowser() *modelBrowser {
 	m := makeDefaultBrowser()
 	m.m4Dir.CurrentPath = "/home/home/documents"
 	for i := 0; i < 5; i++ {
@@ -227,7 +229,8 @@ func makeSampleBrowser() *modelBrowser { // nolint:staticcheck
 	return m
 }
 
-func updateSampleBrowser(m *modelBrowser) { // nolint:staticcheck
+// nolint: unused, deadcode
+func updateSampleBrowser(m *modelBrowser) {
 	m.m4Dir.CurrentPath = "/home/home/documents/repertoire"
 	m.m4Dir.Nodes = m.m4Dir.Nodes[:0]
 	for i := 0; i < 15; i++ {
@@ -239,6 +242,7 @@ func updateSampleBrowser(m *modelBrowser) { // nolint:staticcheck
 	m4remoteLocation = m.m4Dir.CurrentPath
 }
 
+// nolint: ireturn
 func MakeM4DiskBrowser() ui.Control {
 
 	m4Browser = makeDefaultBrowser()
@@ -313,7 +317,8 @@ func addFile(i int, m *modelBrowser) {
 	}
 }
 
-func removeFileWithData(directory, name string) { // nolint:staticcheck
+// nolint: unused, deadcode
+func removeFileWithData(directory, name string) {
 	indexToRemove := -1
 	for index, v := range selectedFiles {
 		if v.Name == name && directory == v.Directory {

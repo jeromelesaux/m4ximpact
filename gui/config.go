@@ -14,6 +14,7 @@ var (
 	mailFrom    *ui.Entry
 )
 
+// nolint: ireturn
 func MakeConfigurationPage() ui.Control {
 	vbox := ui.NewVerticalBox()
 	vbox.SetPadded(true)
